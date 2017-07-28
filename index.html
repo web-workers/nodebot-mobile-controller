@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>NodeBot Controller</title>
+
+    <style>
+        * {  box-sizing: border-box; }
+        html, body {height: 100%; margin: 0; padding: 0}
+
+        .controller {
+            display: flex;
+            height: 100%;
+            flex-wrap: wrap;
+            flex-direction: column;
+        }
+        .button {
+            padding: 0;
+            border: 0;
+            margin: 0;
+            width: 50%;
+            height: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20vw;
+            line-height: 1;
+            cursor: pointer;
+            -webkit-touch-callout:none;
+            -webkit-user-select:none;
+            -khtml-user-select:none;
+            -moz-user-select:none;
+            -ms-user-select:none;
+            user-select:none;
+            -webkit-tap-highlight-color:rgba(0,0,0,0);
+        }
+
+        .button.down {
+            color: white;
+        }
+
+        .leftFwd {
+            background-color: tomato;
+        }
+
+        .leftRev {
+            background-color: springgreen;
+        }
+
+        .rightFwd {
+            background-color: rebeccapurple;
+        }
+
+        .rightRev {
+            background-color: cornflowerblue;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="controller" class="controller">
+    <div id="leftFwd" class="button leftFwd">▲</div>
+    <div id="leftRev" class="button leftRev">▼</div>
+    <div id="rightFwd" class="button rightFwd">▲</div>
+    <div id="rightRev" class="button rightRev">▼</div>
+</div>
+
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+    var $ = document.getElementById.bind(document);
+    function go() {
+        console.log('hiasdf');
+        var socket = io('http://192.168.2.201:8001');
+
+        var leftFwd = $('leftFwd');
+        var leftRev = $('leftRev');
+        var rightFwd = $('rightFwd');
+        var rightRev = $('rightRev');
+
+        var directions = {
+            leftFwd: 0,
+            rightFwd: 0,
+            leftRev: 0,
+            rightRev: 0
+        };
+
+        var btns = [leftFwd, rightFwd, leftRev, rightRev];
+
+        btns.forEach(function(btn) {
+            var down = function(e) {
+                directions[btn.id] = 1;
+                btn.classList.toggle('down');
+            };
+
+            var up = function(e) {
+                directions[btn.id] = 0;
+                btn.classList.toggle('down');
+            };
+
+            //btn.addEventListener('mouseup', down);
+            btn.addEventListener('touchstart', down);
+
+            //btn.addEventListener('mousedown', up);
+            btn.addEventListener('touchend', up);
+
+            btn.addEventListener('selectstart', function() {return false;})
+        });
+
+        socket.on('botReady', function (data) {
+            console.log('bot is ready');
+
+            var intervalHandle = setInterval(function() {
+                socket.emit('botMove', directions);
+            }, 40);
+        });
+
+    };
+
+    window.onload = go;
+</script>
+
+
+</body>
+</html>
